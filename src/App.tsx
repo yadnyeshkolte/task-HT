@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import './App.css'
 
@@ -142,16 +142,12 @@ function App() {
   const todayKey = toDateKey(today)
   const currentWeekStartKey = toDateKey(startOfWeek(today))
 
-  const weekDays = useMemo(() => {
-    return Array.from({ length: 7 }, (_, dayIndex) => addDays(selectedWeekStart, dayIndex))
-  }, [selectedWeekStart])
+  const weekDays = Array.from({ length: 7 }, (_, dayIndex) => addDays(selectedWeekStart, dayIndex))
 
-  const streaksByHabit = useMemo(() => {
-    return trackerState.habits.reduce<Record<string, number>>((streaks, habit) => {
-      streaks[habit.id] = calculateCurrentStreak(trackerState.completions[habit.id], todayKey)
-      return streaks
-    }, {})
-  }, [trackerState.completions, trackerState.habits, todayKey])
+  const streaksByHabit = trackerState.habits.reduce<Record<string, number>>((streaks, habit) => {
+    streaks[habit.id] = calculateCurrentStreak(trackerState.completions[habit.id], todayKey)
+    return streaks
+  }, {})
 
   const todayCompleted = trackerState.habits.filter((habit) => {
     return trackerState.completions[habit.id]?.[todayKey]
@@ -215,7 +211,8 @@ function App() {
 
   function deleteHabit(habitId: string) {
     setTrackerState((currentState) => {
-      const { [habitId]: _removedHabit, ...remainingCompletions } = currentState.completions
+      const remainingCompletions = { ...currentState.completions }
+      delete remainingCompletions[habitId]
 
       return {
         habits: currentState.habits.filter((habit) => habit.id !== habitId),
